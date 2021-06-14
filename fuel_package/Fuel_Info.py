@@ -35,28 +35,26 @@ class Fuel_Info:
             return None
 
     def generate_db_entry(self):
-
-        while True:
-            data = self.__get_fuel_data()
-            if data is None:
-                print("es gab einen Error mit dem Server")
-                with open(os.path.abspath("./error/error.json"),"r+") as file:
+        data = self.__get_fuel_data()
+        if data is None:
+            print("es gab einen Error mit dem Server")
+            with open(os.path.abspath("./error/error.json"),"r+") as file:
+                data = json.load(file)
+                data.update({self.datum:"Daten konnten nicht vom Server abgerufen werden"})
+                file.seek(0)
+                json.dump(data,file)
+        else:
+            data['date'] = self.__get_datetime_now()
+            try:
+                self.__write_data_to_DB(data)
+            except:
+                print("es gab einen Error mit der DB")
+                with open(os.path.abspath("./error/error.json"), "r+") as file:
                     data = json.load(file)
-                    data.update({self.datum:"Daten konnten nicht vom Server abgerufen werden"})
+                    data.update({self.datum: "Daten konnten nicht in die Datenbank geschrieben werden"})
                     file.seek(0)
-                    json.dump(data,file)
-            else:
-                data['date'] = self.__get_datetime_now()
-                try:
-                    self.__write_data_to_DB(data)
-                except:
-                    print("es gab einen Error mit der DB")
-                    with open(os.path.abspath("./error/error.json"), "r+") as file:
-                        data = json.load(file)
-                        data.update({self.datum: "Daten konnten nicht in die Datenbank geschrieben werden"})
-                        file.seek(0)
-                        json.dump(data, file)
-            time.sleep(3600)
+                    json.dump(data, file)
+
 
 
 
